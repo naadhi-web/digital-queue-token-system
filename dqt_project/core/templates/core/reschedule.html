@@ -1,0 +1,9 @@
+{% extends "core/base.html" %}
+{% block content %}
+<h4>Reschedule Token T{{ token.number }} ({{ token.user.username }})</h4>
+<form method="post">{% csrf_token %}
+  {{ form.as_p }}
+  <button class="btn btn-primary">Move</button>
+  <a href="{% url 'monitor_queue' token.slot.id %}" class="btn btn-secondary">Back</a>
+</form>
+{% endblock %}

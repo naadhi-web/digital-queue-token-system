@@ -1,0 +1,24 @@
+{% extends "core/base.html" %}
+{% block content %}
+<h4>Slots</h4>
+<a class="btn btn-primary mb-3" href="{% url 'create_slot' %}">New Slot</a>
+<table class="table">
+  <thead><tr><th>Name</th><th>Type</th><th>Date</th><th>Times</th><th>Max</th><th>Booked</th><th>Actions</th></tr></thead>
+  <tbody>
+    {% for s in slots %}
+    <tr>
+      <td>{{ s.name }}</td>
+      <td>{{ s.queue_type }}</td>
+      <td>{{ s.date }}</td>
+      <td>{{ s.start_time }} - {{ s.end_time }}</td>
+      <td>{{ s.max_tokens }}</td>
+      <td>{{ s.active_count }}</td>
+      <td>
+        <a class="btn btn-sm btn-primary" href="{% url 'monitor_queue' s.id %}">Monitor</a>
+        <a class="btn btn-sm btn-secondary" href="{% url 'edit_slot' s.id %}">Edit</a>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

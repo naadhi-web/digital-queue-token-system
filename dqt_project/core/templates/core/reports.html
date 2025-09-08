@@ -1,0 +1,36 @@
+{% extends "core/base.html" %}
+{% block content %}
+<div class="row">
+  <div class="col-md-10 offset-md-1">
+    <div class="card p-4">
+      <h3 class="mb-3">Usage Reports</h3>
+      <table class="table table-bordered">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Queue Type</th>
+            <th>Total Tokens</th>
+            <th>Served</th>
+            <th>Skipped</th>
+            <th>Cancelled</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for report in reports %}
+          <tr>
+            <td>{{ report.date }}</td>
+            <td>{{ report.queue_type }}</td>
+            <td>{{ report.total }}</td>
+            <td>{{ report.served }}</td>
+            <td>{{ report.skipped }}</td>
+            <td>{{ report.cancelled }}</td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="6" class="text-center">No reports yet.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

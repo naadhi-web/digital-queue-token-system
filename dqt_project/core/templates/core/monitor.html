@@ -1,0 +1,38 @@
+{% extends "core/base.html" %}
+{% block content %}
+<div class="row">
+  <div class="col-md-10 offset-md-1">
+    <div class="card p-4">
+      <h3>Queue Monitor - {{ slot.name }} ({{ slot.queue_type }})</h3>
+      <table class="table table-hover mt-3">
+        <thead>
+          <tr>
+            <th>Token #</th>
+            <th>User</th>
+            <th>Status</th>
+            <th>ETA</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for t in tokens %}
+          <tr>
+            <td><b>{{ t.number }}</b></td>
+            <td>{{ t.user.username }}</td>
+            <td><span class="badge bg-info">{{ t.status }}</span></td>
+            <td>{% if t.eta_minutes %}~{{ t.eta_minutes }} min{% endif %}</td>
+            <td>
+              <a href="{% url 'approve_token' t.id %}" class="btn btn-sm btn-success">Approve</a>
+              <a href="{% url 'skip_token' t.id %}" class="btn btn-sm btn-warning">Skip</a>
+              <a href="{% url 'reschedule_token' t.id %}" class="btn btn-sm btn-secondary">Reschedule</a>
+            </td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="5" class="text-center">No tokens yet.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}
