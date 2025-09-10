@@ -1,6 +1,11 @@
 from django.contrib import admin
 from .models import QueueSlot, Token, VisitHistory
 
+admin.site.site_header = "My Custom Admin"
+admin.site.site_title = "My Custom Admin Portal"
+admin.site.index_title = "Welcome to the Admin Panel"
+
+
 @admin.register(QueueSlot)
 class QueueSlotAdmin(admin.ModelAdmin):
     list_display = ("id", "name", "queue_type", "date", "start_time", "end_time", "max_tokens")
