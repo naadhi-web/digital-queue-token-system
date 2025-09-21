@@ -5,22 +5,19 @@ admin.site.site_header = "My Custom Admin"
 admin.site.site_title = "My Custom Admin Portal"
 admin.site.index_title = "Welcome to the Admin Panel"
 
-
-@admin.register(QueueSlot)
-class QueueSlotAdmin(admin.ModelAdmin):
-    list_display = ("id", "name", "queue_type", "date", "start_time", "end_time", "max_tokens")
-    list_filter = ("queue_type", "date")
-    search_fields = ("name",)
-
 @admin.register(Token)
 class TokenAdmin(admin.ModelAdmin):
-    # Use only fields that really exist in your Token model
-    list_display = ("id", "slot", "user", "number", "status")
-    list_filter = ("status", "slot__queue_type", "slot__date")
-    search_fields = ("user__username", "slot__name")
+    list_display = ('id', 'user', 'slot', 'issued_at', 'is_active')
+    list_filter = ('is_active', 'slot__service')  # ✅ updated from slot__queue_type → slot__service
+
 
 @admin.register(VisitHistory)
 class VisitHistoryAdmin(admin.ModelAdmin):
     list_display = ("id", "user", "slot", "token_number", "outcome", "timestamp")
     list_filter = ("outcome", "timestamp")
     search_fields = ("user__username", "slot__name")
+
+@admin.register(QueueSlot)
+class QueueSlotAdmin(admin.ModelAdmin):
+    list_display = ('id', 'service', 'date', 'start_time', 'end_time', 'max_tokens')
+    list_filter = ('service', 'date')  # use 'service' instead of queue_type

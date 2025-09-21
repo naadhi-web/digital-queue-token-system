@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Welcome - Queue Management</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+</head>
+<body class="bg-light">
+
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="{% url 'home' %}">Queue System</a>
+            <div>
+                <a class="btn btn-outline-light me-2" href="{% url 'login' %}">Login</a>
+                <a class="btn btn-success" href="{% url 'register' %}">Register</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container text-center py-5">
+        <h1 class="display-4">Welcome to the Online Queue Management System</h1>
+        <p class="lead mt-3">Book, manage, and track your tokens easily for services like library or canteen.</p>
+        
+        <div class="mt-4">
+            <a href="{% url 'login' %}" class="btn btn-primary btn-lg me-3">Login</a>
+            <a href="{% url 'register' %}" class="btn btn-outline-secondary btn-lg">Register</a>
+        </div>
+    </div>
+
+    <footer class="text-center text-muted py-3 mt-5">
+        <p>&copy; {{ now|date:"Y" }} Queue Management System</p>
+    </footer>
+
+</body>
+</html>

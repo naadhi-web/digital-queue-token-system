@@ -1,0 +1,26 @@
+{% extends "core/base.html" %}
+{% block content %}
+<div class="d-flex justify-content-center align-items-center" style="min-height: 80vh;">
+  <div class="card shadow-lg p-4" style="max-width: 450px; width: 100%; border-radius: 15px;">
+    <h3 class="text-center mb-4 fw-bold">Book a Token</h3>
+
+    <form method="post" novalidate>
+      {% csrf_token %}
+      
+      <div class="mb-3">
+        {{ form.slot.label_tag }}
+        {{ form.slot }}
+        {% if form.slot.errors %}
+          <div class="text-danger small mt-1">
+            {{ form.slot.errors }}
+          </div>
+        {% endif %}
+      </div>
+
+      <button type="submit" class="btn btn-success w-100">
+        <i class="bi bi-check-circle"></i> Book Token
+      </button>
+    </form>
+  </div>
+</div>
+{% endblock %}

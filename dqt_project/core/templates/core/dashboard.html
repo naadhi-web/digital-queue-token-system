@@ -1,36 +1,73 @@
 {% extends "core/base.html" %}
+
 {% block content %}
-<div class="row">
-  <div class="col-md-10 offset-md-1">
-    <div class="card p-4 mb-4">
-      <h3 class="mb-3">My Active Tokens</h3>
-      {% if active_tokens %}
-        <ul class="list-group mb-3">
-          {% for t in active_tokens %}
-            <li class="list-group-item d-flex justify-content-between align-items-center">
-              Token <b>#{{ t.number }}</b> ({{ t.slot.name }} - {{ t.slot.queue_type }})
-              <span class="badge bg-info text-dark">{{ t.status }}</span>
-            </li>
-          {% endfor %}
-        </ul>
+<div class="container mt-4">
+
+  <h3 class="mb-3">Book a Slot</h3>
+  <div class="d-flex gap-3">
+
+    <!-- Library Booking Button -->
+    <a href="{% url 'book_library' %}" class="btn btn-success btn-lg">
+      <i class="bi bi-book"></i> Book Library Slot
+    </a>
+
+    <!-- Canteen Booking Button -->
+    <a href="{% url 'book_canteen' %}" class="btn btn-primary btn-lg">
+      <i class="bi bi-shop"></i> Book Canteen Slot
+    </a>
+
+  </div>
+
+  <div class="container mt-5">
+
+    <!-- Active Token Section -->
+    <div class="card shadow-sm p-4 mb-4">
+      <h4>My Active Tokens</h4>
+      {% if active_token %}
+        {% for token in active_token %}
+          {% if token.is_active %}
+            <p><strong>Token #{{ token.number }}</strong> ({{ token.slot }})</p>
+            <p>Status: <span class="badge bg-success">Active</span></p>
+            <a href="/cancel_token/{{ token.number }}/" class="btn btn-danger btn-sm">Cancel Token</a>
+          {% else %}
+            <p><strong>Token #{{ token.number }}</strong> ({{ token.slot }})</p>
+            <p>Status: <span class="badge bg-warning">Pending</span></p>
+          {% endif %}
+        {% endfor %}
       {% else %}
-        <div class="alert alert-info">No active tokens right now.</div>
+        <p>No active tokens.</p>
+        <a href="/book_token/" class="btn btn-success">Book New Token</a>
       {% endif %}
     </div>
 
-    <div class="card p-4">
-      <h4 class="mb-3">Upcoming Slots</h4>
-      <ul class="list-group">
-        {% for slot in upcoming_slots %}
-          <li class="list-group-item d-flex justify-content-between align-items-center">
-            {{ slot.name }} ({{ slot.queue_type }}) - {{ slot.date }} {{ slot.start_time }}
-            <a href="{% url 'book_token' %}" class="btn btn-sm btn-success">Book</a>
-          </li>
-        {% empty %}
-          <li class="list-group-item">No slots available.</li>
-        {% endfor %}
-      </ul>
+    <!-- Upcoming Slots -->
+    <div class="card shadow-sm p-4 mb-4">
+      <h4>Upcoming Slots</h4>
+      {% if upcoming_slots %}
+        <ul>
+          {% for token in upcoming_slots %}
+            <li>Token #{{ token.number }} - {{ token.slot }}</li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p>No slots available.</p>
+      {% endif %}
     </div>
+
+    <!-- Notifications -->
+    <div class="card shadow-sm p-4">
+      <h4>Notifications</h4>
+      {% if notifications %}
+        <ul>
+          {% for note in notifications %}
+            <li>{{ note.message }} ({{ note.time }})</li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p>No new notifications.</p>
+      {% endif %}
+    </div>
+
   </div>
 </div>
 {% endblock %}
