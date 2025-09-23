@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <h2>Your Bookings</h2>
+  <ul>
+    {% for token in tokens %}
+    <li class="booking-item">
+    {{ token.name }} —
+        <a class="text-danger" href="{% url 'cancel_token' token_id=token.id %}">Cancel</a>
+    </li>
+    {% endfor %}
+  </ul>
+{% endblock %}

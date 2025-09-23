@@ -2,8 +2,8 @@ from django import forms
 from django.contrib.auth.models import User
 from .models import QueueSlot
 from django.utils import timezone
-
-
+from .models import CanteenSlot
+from .models import CanteenBooking 
 # ----------------------------
 # User Registration
 # ----------------------------
@@ -92,7 +92,8 @@ class LibrarySlotForm(forms.ModelForm):
 # ----------------------------
 # Canteen Booking Form
 # ----------------------------
-class CanteenSlotForm(forms.ModelForm):
+# For admins to create canteen slots
+class CanteenSlotAdminForm(forms.ModelForm):
     class Meta:
         model = QueueSlot
         fields = ['service', 'date', 'start_time', 'end_time']
@@ -105,5 +106,17 @@ class CanteenSlotForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # ✅ Only show canteen slots
+        # Only show 'canteen' services
         self.fields['service'].queryset = QueueSlot.objects.filter(service="canteen")
+
+
+# For students to book an existing canteen slot
+class CanteenBookingForm(forms.ModelForm):
+    class Meta:
+        model = CanteenSlot  # assuming this model stores bookings
+        fields = ['slot']
+
+class CanteenBookingForm(forms.ModelForm):
+    class Meta:
+        model = CanteenBooking
+        fields = '__all__'  

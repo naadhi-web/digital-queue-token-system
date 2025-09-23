@@ -1,28 +1,102 @@
-{% extends "core/base.html" %}
-{% block content %}
-
-<div class="d-flex justify-content-center align-items-center" style="min-height: 80vh;">
-  <div class="card shadow-lg p-4" style="max-width: 450px; width: 100%; border-radius: 15px;">
-
-    <h3 class="text-center mb-4 fw-bold text-success">📚 Book a Library Slot</h3>
-
-    <form method="post" novalidate>
-      {% csrf_token %}
-      
-      <div class="mb-3">
-        <label for="id_slot" class="form-label">Select Library Slot</label>
-        {{ form.slot }}
-        {% if form.slot.errors %}
-          <div class="text-danger small">{{ form.slot.errors }}</div>
-        {% endif %}
-      </div>
-
-      <button type="submit" class="btn btn-success w-100">
-        <i class="bi bi-check-circle"></i> Book Library Token
-      </button>
-    </form>
-
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Library Slot Booking</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f9f9f9;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+    .container {
+      background: white;
+      padding: 2rem;
+      border-radius: 10px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.1);
+      width: 350px;
+      text-align: center;
+    }
+    h2 {
+      color: #2e7d32;
+    }
+    select, button {
+      width: 100%;
+      padding: 0.6rem;
+      margin: 1rem 0;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+      font-size: 1rem;
+    }
+    button {
+      background-color: #2e7d32;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    button:disabled {
+      background-color: #a5d6a7;
+      cursor: not-allowed;
+    }
+    .error {
+      color: red;
+      font-size: 0.9rem;
+    }
+    .success {
+      color: green;
+      font-size: 1rem;
+      margin-top: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>📚 Book a Library Slot</h2>
+    <label for="slot">Select Library Slot</label>
+    <select id="slot">
+      <option value="">---------</option>
+      <option value="9am-10am">9 AM - 10 AM</option>
+      <option value="10am-11am">10 AM - 11 AM</option>
+      <option value="11am-12pm">11 AM - 12 PM</option>
+      <option value="1pm-2pm">1 PM - 2 PM</option>
+      <option value="2pm-3pm">2 PM - 3 PM</option>
+    </select>
+    <div id="error" class="error"></div>
+    <button id="bookBtn">Book Library Token</button>
+    <div id="message" class="success"></div>
   </div>
-</div>
 
-{% endblock %}
+  <script>
+    const slotSelect = document.getElementById('slot');
+    const bookBtn = document.getElementById('bookBtn');
+    const errorDiv = document.getElementById('error');
+    const messageDiv = document.getElementById('message');
+
+    bookBtn.addEventListener('click', () => {
+      errorDiv.textContent = '';
+      messageDiv.textContent = '';
+
+      if (!slotSelect.value) {
+        errorDiv.textContent = 'This field is required.';
+        return;
+      }
+
+      // Simulate booking process
+      bookBtn.disabled = true;
+      bookBtn.textContent = 'Booking...';
+
+      setTimeout(() => {
+        bookBtn.disabled = false;
+        bookBtn.textContent = 'Book Library Token';
+        messageDiv.textContent = `You have successfully booked the slot: ${slotSelect.value}`;
+        slotSelect.value = '';
+      }, 1500);
+    });
+  </script>
+</body>
+</html>

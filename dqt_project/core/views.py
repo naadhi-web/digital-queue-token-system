@@ -9,7 +9,8 @@ from .forms import BookingForm
 from .forms import UserRegisterForm, BookingForm
 from .models import QueueSlot, Token, VisitHistory
 from django.shortcuts import render
-
+from .forms import CanteenBookingForm  
+from .models import CanteenBooking
 
 def home(request):
     return render(request, "core/home.html")
@@ -99,10 +100,25 @@ def cancel_token(request, token_id):
     token = get_object_or_404(Token, id=token_id, user=request.user, status__in=["pending", "approved"])
     token.mark_cancelled()
     VisitHistory.objects.create(
-        user=request.user, slot=token.slot, token_number=token.number, outcome="cancelled"
+        user=request.user,
+        slot=token.slot,
+        token_number=token.number,
+        outcome="cancelled"
     )
     messages.info(request, "Token cancelled.")
     return redirect("dashboard")
+def cancel_token(request, token_id):
+    token = get_object_or_404(Token, id=token_id, user=request.user, status__in=["pending", "approved"])
+    token.mark_cancelled()
+    VisitHistory.objects.create(
+        user=request.user,
+        slot=token.slot,
+        token_number=token.number,
+        outcome="cancelled"
+    )
+    messages.info(request, "Token cancelled.")
+    return redirect("dashboard")
+
 
 # -------------------------
 # ADMIN HELPERS
@@ -180,3 +196,18 @@ def book_generic(request, service, template):
     else:
         form = BookingForm()
     return render(request, template, {"form": form})
+
+@login_required
+def book_canteen_slot(request):
+    if request.method == 'POST':
+        form = CanteenBookingForm(request.POST)
+        if form.is_valid():
+            booking = form.save(commit=False)
+            booking.user = request.user
+            booking.save()
+            messages.success(request, f"You have successfully booked the slot: {booking.time_slot}")
+            return redirect('dashboard')  # Make sure this route exists
+    else:
+        form = CanteenBookingForm()
+
+    return render(request, 'core/book_slot.html', {'form': form})

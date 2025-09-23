@@ -10,9 +10,10 @@ urlpatterns = [
     path("dashboard/", views.dashboard, name="dashboard"),
 
     path("book_token/", views.book_token, name="book_token"),
-    path("cancel/<int:token_id>/", views.cancel_token, name="cancel_token"),
+    path('cancel_token/<int:token_id>/', views.cancel_token, name='cancel_token'),
     path("book/library/", views.book_library, name="book_library"),
-    path("book/canteen/", views.book_canteen, name="book_canteen"),
+
+    path('canteen/book-canteen/', views.book_canteen_slot, name='book_canteen'),
 
     # Admin
     path("admin/dashboard/", views.admin_dashboard, name="admin_dashboard"),

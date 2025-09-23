@@ -62,3 +62,31 @@ class VisitHistory(models.Model):
 
     def __str__(self):
         return f"{self.user.username} - {self.slot} - T{self.token_number} - {self.outcome}"
+    
+class CanteenSlot(models.Model):
+    SLOT_CHOICES = [
+        ("12:00-12:15", "12:00 - 12:15 PM"),
+        ("12:15-12:30", "12:15 - 12:30 PM"),
+        ("12:30-12:45", "12:30 - 12:45 PM"),
+        # Add more slots as needed
+    ]
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    slot = models.CharField(max_length=20, choices=SLOT_CHOICES)
+    date = models.DateField(auto_now_add=True)
+    
+    def __str__(self):
+        return f"{self.user.username} - {self.slot} ({self.date})"
+    
+class CanteenBooking(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    date = models.DateField()
+    time_slot = models.CharField(max_length=50, choices=[
+        ('8:00-9:00', '8:00-9:00 AM'),
+        ('9:00-10:00', '9:00-10:00 AM'),
+        ('12:00-1:00', '12:00-1:00 PM'),
+        ('1:00-2:00', '1:00-2:00 PM'),
+    ])
+    purpose = models.TextField()
+
+    def __str__(self):
+        return f"{self.user.username} - {self.date} @ {self.time_slot}"
