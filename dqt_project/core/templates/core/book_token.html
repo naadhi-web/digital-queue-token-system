@@ -1,26 +1,48 @@
-{% extends "core/base.html" %}
+{% extends 'core/base.html' %}
+
+{% block title %}Book Token - QueueToken System{% endblock %}
+
 {% block content %}
-<div class="d-flex justify-content-center align-items-center" style="min-height: 80vh;">
-  <div class="card shadow-lg p-4" style="max-width: 450px; width: 100%; border-radius: 15px;">
-    <h3 class="text-center mb-4 fw-bold">Book a Token</h3>
-
-    <form method="post" novalidate>
-      {% csrf_token %}
-      
-      <div class="mb-3">
-        {{ form.slot.label_tag }}
-        {{ form.slot }}
-        {% if form.slot.errors %}
-          <div class="text-danger small mt-1">
-            {{ form.slot.errors }}
-          </div>
-        {% endif %}
-      </div>
-
-      <button type="submit" class="btn btn-success w-100">
-        <i class="bi bi-check-circle"></i> Book Token
-      </button>
-    </form>
-  </div>
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="mb-0 text-dark"><i class="fas fa-ticket-alt"></i> Book New Token</h4>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <div class="mb-3">
+                            <label for="slot" class="form-label">Select Service Slot</label>
+                            <select class="form-select" id="slot" name="slot" required>
+                                <option value="">Choose a slot...</option>
+                                {% for slot in slots %}
+                                    <option value="{{ slot.id }}">
+                                        {{ slot.get_service_display }} - {{ slot.date }} 
+                                        ({{ slot.start_time }} to {{ slot.end_time }})
+                                        - {{ slot.max_tokens }} tokens available
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <div class="alert alert-primary">
+                            <i class="fas fa-info-circle"></i>
+                            You can only have one active token per service at a time.
+                        </div>
+                        
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-ticket-alt"></i> Book Token
+                            </button>
+                            <a href="{% url 'dashboard' %}" class="btn btn-secondary">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 {% endblock %}

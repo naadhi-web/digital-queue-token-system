@@ -1,73 +1,102 @@
-{% extends "core/base.html" %}
+{% extends 'core/base.html' %}
+
+{% block title %}Dashboard - QueueToken System{% endblock %}
 
 {% block content %}
 <div class="container mt-4">
-
-  <h3 class="mb-3">Book a Slot</h3>
-  <div class="d-flex gap-3">
-
-    <!-- Library Booking Button -->
-    <a href="{% url 'book_library' %}" class="btn btn-success btn-lg">
-      <i class="bi bi-book"></i> Book Library Slot
-    </a>
-
-    <!-- Canteen Booking Button -->
-    <a href="{% url 'book_canteen' %}" class="btn btn-primary btn-lg">
-      <i class="bi bi-shop"></i> Book Canteen Slot
-    </a>
-
-  </div>
-
-  <div class="container mt-5">
-
-    <!-- Active Token Section -->
-    <div class="card shadow-sm p-4 mb-4">
-      <h4>My Active Tokens</h4>
-      {% if active_token %}
-        {% for token in active_token %}
-          {% if token.is_active %}
-            <p><strong>Token #{{ token.number }}</strong> ({{ token.slot }})</p>
-            <p>Status: <span class="badge bg-success">Active</span></p>
-            <a href="/cancel_token/{{ token.number }}/" class="btn btn-danger btn-sm">Cancel Token</a>
-          {% else %}
-            <p><strong>Token #{{ token.number }}</strong> ({{ token.slot }})</p>
-            <p>Status: <span class="badge bg-warning">Pending</span></p>
-          {% endif %}
-        {% endfor %}
-      {% else %}
-        <p>No active tokens.</p>
-        <a href="/book_token/" class="btn btn-success">Book New Token</a>
-      {% endif %}
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card bg-light">
+                <div class="card-body">
+                    <h3 class="card-title text-dark">
+                        <i class="fas fa-tachometer-alt"></i> Welcome, {{ user.username }}!
+                    </h3>
+                    <p class="card-text text-dark">Manage your queue tokens and bookings from here.</p>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <!-- Upcoming Slots -->
-    <div class="card shadow-sm p-4 mb-4">
-      <h4>Upcoming Slots</h4>
-      {% if upcoming_slots %}
-        <ul>
-          {% for token in upcoming_slots %}
-            <li>Token #{{ token.number }} - {{ token.slot }}</li>
-          {% endfor %}
-        </ul>
-      {% else %}
-        <p>No slots available.</p>
-      {% endif %}
-    </div>
 
-    <!-- Notifications -->
-    <div class="card shadow-sm p-4">
-      <h4>Notifications</h4>
-      {% if notifications %}
-        <ul>
-          {% for note in notifications %}
-            <li>{{ note.message }} ({{ note.time }})</li>
-          {% endfor %}
-        </ul>
-      {% else %}
-        <p>No new notifications.</p>
-      {% endif %}
+        <div class="col-lg-4 mb-5">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0 text-dark"><i class="fas fa-ticket-alt"></i> Active Tokens</h5>
+                </div>
+                <div class="card-body">
+                    {% if active_tokens %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Token #</th>
+                                        <th>Service</th>
+                                        <th>Slot</th>
+                                        <th>Issued At</th>
+                                        <th>Status</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for token in active_tokens %}
+                                    <tr>
+                                        <td><strong>#{{ token.number }}</strong></td>
+                                        <td>
+                                            <span class="badge bg-primary">
+                                                {{ token.slot.get_service_display }}
+                                            </span>
+                                        </td>
+                                        <td>{{ token.slot.date }} {{ token.slot.start_time }}</td>
+                                        <td>{{ token.issued_at|date:"M d, H:i" }}</td>
+                                        <td>
+                                            <span class="badge bg-{% if token.status == 'active' %}primary{% else %}warning{% endif %}">
+                                                {{ token.get_status_display }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <a href="{% url 'cancel_token' token.id %}" class="btn btn-sm btn-outline-danger" 
+                                               onclick="return confirm('Are you sure you want to cancel this token?')">
+                                                <i class="fas fa-times"></i> Cancel
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-ticket-alt fa-3x text-muted mb-3"></i>
+                            <p class="text-muted">No active tokens found.</p>
+                            <a href="{% url 'book_token' %}" class="btn btn-primary">Book Your First Token</a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
     </div>
-
-  </div>
 </div>
+
+<div class="row">
+    <div class="col-lg-4 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0 text-dark"><i class="fas fa-rocket"></i> Quick Actions</h5>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <a href="{% url 'book_library' %}" class="btn btn-outline-primary">
+                        <i class="fas fa-book"></i> Book Library Token
+                    </a>
+                    <a href="{% url 'book_canteen' %}" class="btn btn-outline-primary">
+                        <i class="fas fa-utensils"></i> Book Canteen Token
+                    </a>
+                
+                    <a href="{% url 'my_history' %}" class="btn btn-outline-primary">
+                        <i class="fas fa-history"></i> View History
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
 {% endblock %}

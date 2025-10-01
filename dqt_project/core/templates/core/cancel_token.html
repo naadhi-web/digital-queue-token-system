@@ -1,13 +1,29 @@
 {% extends 'base.html' %}
 
 {% block content %}
-  <h2>Your Bookings</h2>
-  <ul>
-    {% for token in tokens %}
-    <li class="booking-item">
-    {{ token.name }} —
-        <a class="text-danger" href="{% url 'cancel_token' token_id=token.id %}">Cancel</a>
-    </li>
-    {% endfor %}
-  </ul>
+<div class="container mt-4">
+  <h2 class="mb-4">Your Bookings</h2>
+
+  {% if tokens %}
+    <ul class="list-group">
+      {% for token in tokens %}
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+          <div>
+            <strong>{{ token.name|default:"(No name)" }}</strong>
+            <span class="text-muted"> — Token #{{ token.id }}</span>
+          </div>
+          <a class="btn btn-sm btn-outline-danger"
+             href="{% url 'cancel_token' token_id=token.id %}"
+             onclick="return confirm('Are you sure you want to cancel this booking?');">
+            Cancel
+          </a>
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <div class="alert alert-info mt-3">
+      You have no current bookings.
+    </div>
+  {% endif %}
+</div>
 {% endblock %}

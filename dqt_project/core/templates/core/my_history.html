@@ -1,39 +1,62 @@
-{% extends "base.html" %}
+{% extends "core/base.html" %}
+
+{% block title %}My History - QueueToken System{% endblock %}
 
 {% block content %}
-<div class="container mt-5">
-  <h3 class="mb-4">My Token History</h3>
-  <div class="card shadow-sm p-3">
-    <table class="table table-striped">
-      <thead>
-        <tr>
-          <th>Token No</th>
-          <th>Service</th>s
-          <th>Date</th>
-          <th>Status</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for visit in history %}
-        <tr>
-          <td>#{{ visit.token_number }}</td>
-          <td>{{ visit.slot.service }}</td>
-          <td>{{ visit.timestamp|date:"Y-m-d H:i" }}</td>
-          <td>
-            <span class="badge 
-              {% if visit.outcome == 'served' %} bg-success
-              {% elif visit.outcome == 'cancelled' %} bg-danger
-              {% elif visit.outcome == 'skipped' %} bg-warning
-              {% else %} bg-secondary {% endif %}">
-              {{ visit.outcome }}
-            </span>
-          </td>
-        </tr>
-        {% empty %}
-        <tr><td colspan="4" class="text-center">No history found.</td></tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  </div>
-</div>
+<div class="container mt-4">
+    <h2 class="mb-4 text-dark"><i class="fas fa-history"></i> My History</h2>
+    
+    <!-- Token History -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0 text-dark"><i class="fas fa-ticket-alt"></i> Token History</h5>
+        </div>
+        <div class="card-body">
+            {% if tokens_history %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Token #</th>
+                                <th>Service</th>
+                                <th>Slot Date & Time</th>
+                                <th>Issued At</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for token in tokens_history %}
+                            <tr>
+                                <td><strong>#{{ token.number }}</strong></td>
+                                <td>
+                                    <span class="badge bg-primary">
+                                        {{ token.slot.get_service_display }}
+                                    </span>
+                                </td>
+                                <td>{{ token.slot.date }} {{ token.slot.start_time }}</td>
+                                <td>{{ token.issued_at|date:"M d, Y H:i" }}</td>
+                                <td>
+                                    <span class="badge 
+                                        {% if token.status == 'completed' %} bg-success
+                                        {% elif token.status == 'cancelled' %} bg-danger
+                                        {% elif token.status == 'active' %} bg-primary
+                                        {% else %} bg-warning {% endif %}">
+                                        {{ token.get_status_display }}
+                                    </span>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="text-center py-4">
+                    <i class="fas fa-ticket-alt fa-3x text-muted mb-3"></i>
+                    <p class="text-muted">No token history found.</p>
+                    <a href="{% url 'book_token' %}" class="btn btn-primary">Book Your First Token</a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
 {% endblock %}
