@@ -2,34 +2,463 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Welcome - Queue Management</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Digital Queue Management System - Campus Services</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
-</head>
-<body class="bg-light">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #2c5530;
+            --secondary: #4a7c59;
+            --accent: #8fb996;
+            --light: #f8f9fa;
+            --dark: #1a1a1a;
+        }
 
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        .hero-section {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            padding: 100px 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 100" fill="%23ffffff" opacity="0.1"><polygon points="1000,100 1000,0 0,100"/></svg>');
+            background-size: cover;
+        }
+
+        .feature-card {
+            border: none;
+            border-radius: 15px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            overflow: hidden;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+
+        .feature-icon {
+            width: 80px;
+            height: 80px;
+            background: var(--accent);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            color: white;
+            font-size: 2rem;
+        }
+
+        .campus-image {
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+            width: 100%;
+            height: 300px;
+            object-fit: cover;
+        }
+
+        .campus-image:hover {
+            transform: scale(1.05);
+        }
+
+        .stats-section {
+            background: var(--light);
+            padding: 80px 0;
+        }
+
+        .stat-number {
+            font-size: 3rem;
+            font-weight: 700;
+            color: var(--primary);
+            display: block;
+        }
+
+        .service-card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            transition: all 0.3s ease;
+            height: 100%;
+        }
+
+        .service-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.15);
+        }
+
+        .service-icon {
+            font-size: 3rem;
+            color: var(--primary);
+            margin-bottom: 20px;
+        }
+
+        .navbar-brand {
+            font-weight: 700;
+            font-size: 1.5rem;
+        }
+
+        .btn-campus {
+            background: var(--primary);
+            color: white;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: none;
+        }
+
+        .btn-campus:hover {
+            background: var(--secondary);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .btn-outline-campus {
+            border: 2px solid var(--primary);
+            color: var(--primary);
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            background: transparent;
+        }
+
+        .btn-outline-campus:hover {
+            background: var(--primary);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .section-title {
+            position: relative;
+            margin-bottom: 50px;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 4px;
+            background: var(--accent);
+            border-radius: 2px;
+        }
+
+        .about-section {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        }
+
+        .testimonial-card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            margin: 20px 0;
+        }
+
+        .testimonial-text {
+            font-style: italic;
+            color: #666;
+            margin-bottom: 20px;
+        }
+
+        .testimonial-author {
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        footer {
+            background: var(--dark);
+            color: white;
+            padding: 50px 0 20px;
+        }
+
+        .footer-links a {
+            color: #ccc;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .footer-links a:hover {
+            color: white;
+        }
+
+        .service-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top">
         <div class="container">
-            <a class="navbar-brand" href="{% url 'home' %}">Queue System</a>
-            <div>
-                <a class="btn btn-outline-light me-2" href="{% url 'login' %}">Login</a>
-                <a class="btn btn-success" href="{% url 'register' %}">Register</a>
+            <a class="navbar-brand" href="{% url 'home' %}">
+                <i class="fas fa-ticket-alt me-2"></i>CampusQueue
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" href="#">Features</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#services">Services</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#about">About</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#testimonials">Testimonials</a></li>
+                    <li class="nav-item"><a class="btn btn-campus ms-2" href="{% url 'login' %}">Login</a></li>
+                    <li class="nav-item"><a class="btn btn-outline-campus ms-2" href="{% url 'register' %}">Register</a></li>
+                </ul>
             </div>
         </div>
     </nav>
 
-    <div class="container text-center py-5">
-        <h1 class="display-4">Welcome to the Online Queue Management System</h1>
-        <p class="lead mt-3">Book, manage, and track your tokens easily for services like library or canteen.</p>
-        
-        <div class="mt-4">
-            <a href="{% url 'login' %}" class="btn btn-primary btn-lg me-3">Login</a>
-            <a href="{% url 'register' %}" class="btn btn-outline-secondary btn-lg">Register</a>
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-6">
+                    <h1 class="display-4 fw-bold mb-4">Digital Queue Management System</h1>
+                    <p class="lead mb-4">Streamlining campus services through smart digital queuing. Book library slots, canteen reservations, and manage your campus activities efficiently.</p>
+                    <div class="btn-container">
+                        <a href="{% url 'register' %}" class="btn btn-campus btn-lg me-3">Get Started</a>
+                        <a href="#" class="btn btn-outline-light btn-lg">Learn More</a>
+                    </div>
+                </div>
+                <div class="col-lg-6 text-center">
+                    <img src="https://images.unsplash.com/photo-1553877522-43269d4ea984?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80"
+                         alt="Campus Library" class="campus-image">
+                </div>
+            </div>
         </div>
-    </div>
+    </section>
 
-    <footer class="text-center text-muted py-3 mt-5">
-        <p>&copy; {{ now|date:"Y" }} Queue Management System</p>
+    <!-- Features Section -->
+    <section id="features" class="py-5">
+        <div class="container">
+            <h2 class="text-center section-title">Why Choose CampusQueue?</h2>
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <div class="feature-card card h-100">
+                        <div class="card-body text-center p-4">
+                            <div class="feature-icon">
+                                <i class="fas fa-clock"></i>
+                            </div>
+                            <h4 class="card-title">Time Saving</h4>
+                            <p class="card-text">Reduce waiting times by booking your slots in advance. No more standing in long queues during busy campus hours.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="feature-card card h-100">
+                        <div class="card-body text-center p-4">
+                            <div class="feature-icon">
+                                <i class="fas fa-mobile-alt"></i>
+                            </div>
+                            <h4 class="card-title">Mobile Friendly</h4>
+                            <p class="card-text">Access the queue system from any device - smartphone, tablet, or computer. Manage your bookings on the go.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="feature-card card h-100">
+                        <div class="card-body text-center p-4">
+                            <div class="feature-icon">
+                                <i class="fas fa-chart-line"></i>
+                            </div>
+                            <h4 class="card-title">Real-time Updates</h4>
+                            <p class="card-text">Get instant notifications about your token status, queue position, and service availability across campus.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats Section -->
+    <section class="stats-section">
+        <div class="container">
+            <div class="row text-center">
+                <div class="col-md-3">
+                    <span class="stat-number">5,000+</span>
+                    <p>Students Served</p>
+                </div>
+                <div class="col-md-3">
+                    <span class="stat-number">15,000+</span>
+                    <p>Tokens Processed</p>
+                </div>
+                <div class="col-md-3">
+                    <span class="stat-number">98%</span>
+                    <p>Satisfaction Rate</p>
+                </div>
+                <div class="col-md-3">
+                    <span class="stat-number">24/7</span>
+                    <p>Service Availability</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Services Section -->
+    <section id="services" class="py-5">
+        <div class="container">
+            <h2 class="text-center section-title">Our Campus Services</h2>
+            <div class="row g-4">
+                <div class="col-md-6">
+                    <div class="service-card">
+                        <i class="fas fa-book service-icon"></i>
+                        <h4>Library Access Management</h4>
+                        <p>Book study slots, access reading rooms, reserve research materials, and manage your library visits with our digital token system. Avoid overcrowding and secure your preferred study space.</p>
+                        <img src="https://images.unsplash.com/photo-1589998059171-988d887df646?ixlib=rb-4.0.1&auto=format&fit=crop&w=600&q=80" 
+                             alt="University Library" class="service-image">
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="service-card">
+                        <i class="fas fa-utensils service-icon"></i>
+                        <h4>Canteen & Dining Booking</h4>
+                        <p>Reserve your meal times, avoid lunch rush hours, and enjoy seamless dining experience across campus food courts and cafeterias. Plan your meals around your class schedule.</p>
+                        <img src="https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?ixlib=rb-4.0.1&auto=format&fit=crop&w=600&q=80" 
+                             alt="Campus Canteen" class="service-image">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about" class="about-section py-5">
+        <div class="container">
+            <h2 class="text-center section-title">About CampusQueue</h2>
+            <div class="row align-items-center">
+                <div class="col-lg-6">
+                    <img src="https://images.unsplash.com/photo-1523580494863-6f3031224c94?ixlib=rb-4.0.1&auto=format&fit=crop&w=600&q=80" 
+                         alt="Campus Technology" class="campus-image">
+                </div>
+                <div class="col-lg-6">
+                    <h3 class="mb-4">Transforming Campus Experience Through Technology</h3>
+                    <p class="mb-4">CampusQueue is a comprehensive digital solution designed to streamline queue management across university campuses. Our platform addresses the challenges of traditional queuing systems by providing a smart, efficient, and user-friendly alternative that enhances student life and campus operations.</p>
+                    <p class="mb-4">Founded with the vision of making campus services more accessible and efficient, we've helped thousands of students save valuable time and reduce the stress associated with accessing essential campus facilities.</p>
+                    <div class="row">
+                        <div class="col-6">
+                            <ul class="list-unstyled">
+                                <li><i class="fas fa-check text-success me-2"></i> Time Efficient</li>
+                                <li><i class="fas fa-check text-success me-2"></i> Easy to Use</li>
+                                <li><i class="fas fa-check text-success me-2"></i> 24/7 Access</li>
+                            </ul>
+                        </div>
+                        <div class="col-6">
+                            <ul class="list-unstyled">
+                                <li><i class="fas fa-check text-success me-2"></i> Real-time Updates</li>
+                                <li><i class="fas fa-check text-success me-2"></i> Mobile Friendly</li>
+                                <li><i class="fas fa-check text-success me-2"></i> Secure Platform</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials -->
+    <section id="testimonials" class="py-5">
+        <div class="container">
+            <h2 class="text-center section-title">What Our Students Say</h2>
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="testimonial-card">
+                        <p class="testimonial-text">"CampusQueue has saved me so much time between classes! I can now focus on my studies instead of waiting in lines at the library."</p>
+                        <p class="testimonial-author">- Sarah Johnson, Computer Science</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="testimonial-card">
+                        <p class="testimonial-text">"The canteen booking feature is amazing. No more rushing during lunch breaks or missing meals because of long queues!"</p>
+                        <p class="testimonial-author">- Michael Chen, Engineering</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="testimonial-card">
+                        <p class="testimonial-text">"As an international student, this system made adapting to campus life much easier. The interface is intuitive and reliable."</p>
+                        <p class="testimonial-author">- Priya Sharma, Business Administration</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="py-5" style="background: var(--primary); color: white;">
+        <div class="container text-center">
+            <h2 class="mb-4">Ready to Transform Your Campus Experience?</h2>
+            <p class="lead mb-4">Join thousands of students who are already enjoying seamless queue management across campus facilities.</p>
+            <a href="{% url 'register' %}" class="btn btn-light btn-lg me-3">Create Your Account</a>
+            <a href="{% url 'login' %}" class="btn btn-outline-light btn-lg">Sign In to Dashboard</a>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-4 mb-4">
+                    <h5><i class="fas fa-ticket-alt me-2"></i>CampusQueue</h5>
+                    <p>Streamlining campus services through innovative digital solutions. Making student life more efficient and organized.</p>
+                </div>
+                <div class="col-lg-2 mb-4">
+                    <h6>Quick Links</h6>
+                    <div class="footer-links">
+                        <a href="#features">Features</a><br>
+                        <a href="#services">Services</a><br>
+                        <a href="#about">About Us</a><br>
+                        <a href="#testimonials">Testimonials</a>
+                    </div>
+                </div>
+                <div class="col-lg-3 mb-4">
+                    <h6>Campus Services</h6>
+                    <div class="footer-links">
+                        <a href="#">Library Booking</a><br>
+                        <a href="#">Canteen Reservation</a><br>
+                        <a href="#">Study Room Access</a><br>
+                        <a href="#">Campus Events</a>
+                    </div>
+                </div>
+                <div class="col-lg-3 mb-4">
+                    <h6>Contact Information</h6>
+                    <div class="footer-links">
+                        <p><i class="fas fa-envelope me-2"></i> support@campusqueue.edu</p>
+                        <p><i class="fas fa-phone me-2"></i> +1 (555) 123-4567</p>
+                        <p><i class="fas fa-map-marker-alt me-2"></i> University Main Campus</p>
+                    </div>
+                </div>
+            </div>
+            <hr style="border-color: #555;">
+            <div class="text-center">
+                <p>&copy; 2024 CampusQueue Digital Management System. All rights reserved.</p>
+            </div>
+        </div>
     </footer>
 
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

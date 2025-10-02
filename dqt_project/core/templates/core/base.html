@@ -8,27 +8,267 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
-            --bs-primary: #77dd77;
-            --bs-primary-rgb: 119, 221, 119;
+            --primary-50: #f0f9f0;
+            --primary-100: #dcf2dc;
+            --primary-200: #b8e4b8;
+            --primary-300: #8dd58d;
+            --primary-400: #6ac46a;
+            --primary-500: #4caf50;
+            --primary-600: #3d8b40;
+            --primary-700: #2e6c34;
+            --primary-800: #25572a;
+            --primary-900: #1e4622;
+            
+            --pastel-green: #a8e6cf;
+            --pastel-mint: #d4f1e6;
+            --pastel-sage: #b8d8be;
+            --pastel-teal: #88c9b9;
+            --accent-gold: #ffd166;
+            --accent-coral: #ff9a8b;
+            
+            --gradient-primary: linear-gradient(135deg, var(--primary-400) 0%, var(--primary-600) 100%);
+            --gradient-subtle: linear-gradient(135deg, var(--pastel-mint) 0%, var(--pastel-green) 100%);
+            --gradient-accent: linear-gradient(135deg, var(--accent-gold) 0%, var(--accent-coral) 100%);
+            
+            --shadow-sm: 0 2px 12px rgba(30, 70, 34, 0.08);
+            --shadow-md: 0 4px 24px rgba(30, 70, 34, 0.12);
+            --shadow-lg: 0 8px 40px rgba(30, 70, 34, 0.15);
         }
-        .btn-primary {
-            background-color: var(--bs-primary);
-            border-color: var(--bs-primary);
-            color: #333;
+
+        body {
+            background: linear-gradient(135deg, var(--primary-50) 0%, #ffffff 50%, var(--pastel-mint) 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
-        .btn-primary:hover {
-            background-color: #8df18d;
-            border-color: #8ddf8d;
+
+        .navbar {
+            background: var(--gradient-primary) !important;
+            box-shadow: var(--shadow-md);
+            padding: 1rem 0;
         }
-        .navbar.bg-primary {
-            background-color: var(--bs-primary) !important;
+
+        .navbar-brand {
+            font-weight: 700;
+            font-size: 1.5rem;
+            color: white !important;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
-        .navbar-dark .navbar-brand {
-            color: #0b0c0b !important;
+
+        .navbar-brand i {
+            background: rgba(255,255,255,0.2);
+            padding: 10px;
+            border-radius: 12px;
+            margin-right: 10px;
+            backdrop-filter: blur(10px);
         }
-        .card {
-            box-shadow: 0 4px 6px rgba(24, 22, 22, 0.1);
+
+        .alert {
+            border: none;
+            border-radius: 12px;
+            box-shadow: var(--shadow-sm);
+            border-left: 4px solid var(--primary-500);
+        }
+
+        .alert-success {
+            background: var(--pastel-mint);
+            color: var(--primary-800);
+        }
+
+        .alert-warning {
+            background: #fff3cd;
+            color: #856404;
+            border-left-color: var(--accent-gold);
+        }
+
+        .alert-danger {
+            background: #f8d7da;
+            color: #721c24;
+            border-left-color: var(--accent-coral);
+        }
+
+        .alert-info {
+            background: var(--pastel-green);
+            color: var(--primary-800);
+            border-left-color: var(--pastel-teal);
+        }
+
+        .btn-close {
+            opacity: 0.7;
+        }
+
+        .btn-close:hover {
+            opacity: 1;
+        }
+
+        main {
+            min-height: calc(100vh - 200px);
+        }
+
+        footer {
+            background: var(--gradient-primary) !important;
+            color: white;
+            margin-top: auto;
+            box-shadow: 0 -4px 20px rgba(30, 70, 34, 0.1);
+        }
+
+        footer p {
+            font-weight: 500;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--primary-50);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--primary-400);
             border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--primary-600);
+        }
+
+        /* Professional card styles */
+        .card {
+            border: none;
+            border-radius: 16px;
+            box-shadow: var(--shadow-sm);
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+            overflow: hidden;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .card-header {
+            background: var(--gradient-primary);
+            color: white;
+            border: none;
+            padding: 1.25rem 1.5rem;
+            font-weight: 600;
+        }
+
+        .card-header i {
+            opacity: 0.9;
+        }
+
+        /* Professional buttons */
+        .btn {
+            border-radius: 12px;
+            font-weight: 600;
+            padding: 12px 24px;
+            transition: all 0.3s ease;
+            border: none;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .btn-primary {
+            background: var(--gradient-primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+            background: linear-gradient(135deg, var(--primary-500) 0%, var(--primary-700) 100%);
+        }
+
+        .btn-outline-primary {
+            border: 2px solid var(--primary-400);
+            color: var(--primary-600);
+            background: transparent;
+        }
+
+        .btn-outline-primary:hover {
+            background: var(--primary-400);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        /* Loading animation */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .fade-in-up {
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        /* Professional badge styles */
+        .badge {
+            border-radius: 20px;
+            padding: 8px 16px;
+            font-weight: 600;
+            font-size: 0.75rem;
+        }
+
+        .bg-primary {
+            background: var(--gradient-primary) !important;
+        }
+
+        /* Table enhancements */
+        .table {
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .table thead th {
+            background: var(--gradient-primary);
+            color: white;
+            border: none;
+            padding: 1rem;
+            font-weight: 600;
+        }
+
+        .table tbody td {
+            padding: 1rem;
+            border-color: var(--primary-100);
+            vertical-align: middle;
+        }
+
+        /* Container enhancements */
+        .container {
+            max-width: 1200px;
+        }
+
+        /* Responsive improvements */
+        @media (max-width: 768px) {
+            .navbar-brand {
+                font-size: 1.25rem;
+            }
+            
+            .container {
+                padding-left: 15px;
+                padding-right: 15px;
+            }
+            
+            .card {
+                margin-bottom: 1rem;
+            }
+        }
+
+        /* Focus states for accessibility */
+        .btn:focus,
+        .form-control:focus {
+            box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.25);
+            border-color: var(--primary-400);
         }
     </style>
 </head>
@@ -42,27 +282,62 @@
     </nav>
 
     {% if messages %}
-    <div class="container mt-3">
+    <div class="container mt-3 fade-in-up">
         {% for message in messages %}
         <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
-            {{ message }}
+            <div class="d-flex align-items-center">
+                <i class="fas 
+                    {% if message.tags == 'success' %}fa-check-circle
+                    {% elif message.tags == 'warning' %}fa-exclamation-triangle
+                    {% elif message.tags == 'error' or message.tags == 'danger' %}fa-times-circle
+                    {% else %}fa-info-circle{% endif %}
+                    me-2"></i>
+                <span>{{ message }}</span>
+            </div>
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
         {% endfor %}
     </div>
     {% endif %}
 
-    <main class="container mt-4">
+    <main class="container mt-4 fade-in-up">
         {% block content %}
         {% endblock %}
     </main>
 
     <footer class="bg-primary mt-5 py-4">
         <div class="container text-center">
-            <p class="mb-0">&copy; 2024 Digital Queue Token System</p>
+            <p class="mb-0">
+                <i class="fas fa-shield-alt me-2"></i>
+                &copy; 2024 Digital Queue Token System 
+                <span class="mx-2">•</span>
+                Secure & Efficient
+            </p>
         </div>
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // Add smooth animations
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add loading animation to cards
+            const cards = document.querySelectorAll('.card');
+            cards.forEach((card, index) => {
+                card.style.animationDelay = `${index * 0.1}s`;
+            });
+            
+            // Enhanced alert auto-dismiss
+            const alerts = document.querySelectorAll('.alert');
+            alerts.forEach(alert => {
+                setTimeout(() => {
+                    if (alert.classList.contains('show')) {
+                        const bsAlert = new bootstrap.Alert(alert);
+                        bsAlert.close();
+                    }
+                }, 5000);
+            });
+        });
+    </script>
 </body>
 </html>

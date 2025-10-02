@@ -14,7 +14,8 @@ urlpatterns = [
     # ========================
     path('dashboard/', views.dashboard, name='dashboard'),
     path('my-history/', views.my_history, name='my_history'),
-    
+    path('my-reports/', views.my_reports, name='my_reports'),
+
     # ========================
     # GENERAL TOKEN SYSTEM
     # ========================
@@ -30,13 +31,13 @@ urlpatterns = [
     # CANTEEN BOOKING SYSTEM
     # ========================
     path('book-canteen/', views.book_canteen, name='book_canteen'),
-    path('book-canteen-slot/', views.book_canteen_slot, name='book_canteen_slot'),
     
+   
     # ========================
-    # ADMIN MANAGEMENT SYSTEM
+    # MANAGEMENT SYSTEM
     # ========================
-    path('admin/dashboard/', views.admin_dashboard, name='admin_dashboard'),
-    path('admin/complete-token/<int:token_id>/', views.complete_token, name='complete_token'),
-    path('admin/skip-token/<int:token_id>/', views.skip_token, name='skip_token'),
-    path('admin/reports/', views.reports, name='reports'),
+    path('system/dashboard/', views.admin_dashboard, name='admin_dashboard'),
+    path('system/complete-token/<int:token_id>/', views.complete_token, name='complete_token'),
+    path('system/skip-token/<int:token_id>/', views.skip_token, name='skip_token'),
+    path('system/reports/', views.reports, name='reports'),
 ]

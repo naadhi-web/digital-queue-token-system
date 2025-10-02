@@ -4,11 +4,16 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.models import User
 from django.db import transaction
 from django.shortcuts import get_object_or_404, redirect, render
+from django.db.models import Count, Q  
 from django.utils import timezone
+from datetime import timedelta
+import logging
 
-from .forms import BookingForm, UserRegisterForm, CanteenTimeSlotBookingForm
+from .forms import BookingForm, UserRegisterForm
 from .models import QueueSlot, Token, VisitHistory, CanteenBooking, ActivityLog, Notification
-
+from . import models
+from django.db import models
+from django.db import DatabaseError
 # -------------------------
 # HOME
 # -------------------------
@@ -65,30 +70,87 @@ def user_logout(request):
 # DASHBOARD
 # -------------------------
 
+logger = logging.getLogger(__name__)
 @login_required
 def dashboard(request):
     user = request.user
+    today = timezone.now().date()
     
-    # Get active tokens for the current user
-    active_tokens = Token.objects.filter(user=user, status="active").order_by("-issued_at")
-    
-    # Get upcoming canteen bookings
-    upcoming_slots = CanteenBooking.objects.filter(
-        user=user, 
-        status='confirmed', 
-        date__gte=timezone.now().date()
-    ).order_by("date", "time_slot")
-    
-    # Get notifications and activities
-    notifications = Notification.objects.filter(user=user, is_read=False).order_by('-created_at')[:5]
-    activities = ActivityLog.objects.filter(user=user).order_by('-timestamp')[:10]
-    
-    return render(request, "core/dashboard.html", {
-        "active_tokens": active_tokens,
-        "upcoming_slots": upcoming_slots,
-        "notifications": notifications,
-        "activities": activities,
-    })
+    try:
+        # Get active tokens for the current user
+        active_tokens = Token.objects.filter(user=user, status="active").order_by("-issued_at")
+        
+        # Get upcoming canteen bookings
+        upcoming_slots = CanteenBooking.objects.filter(
+            user=user, 
+            date__gte=today
+        ).order_by("date", "time_slot")
+        
+        # Get notifications and activities
+        activities = ActivityLog.objects.filter(user=user).order_by('-timestamp')[:10]
+        notifications = Notification.objects.filter(user=user).order_by('-created_at')[:5]
+        
+        # Add reports data for staff users
+        today_stats = {}
+        recent_reports = []
+        
+        if user.is_staff:
+            # Today's statistics
+            today_stats = {
+                'total_tokens': Token.objects.filter(issued_at__date=today).count(),
+                'served_tokens': Token.objects.filter(status='completed', issued_at__date=today).count(),
+                'active_tokens': Token.objects.filter(status='active').count(),
+                'total_bookings': CanteenBooking.objects.filter(date=today).count(),
+            }
+            
+            # Recent reports data (last 7 days)
+            last_week = today - timedelta(days=7)
+            
+            # Fixed: Use Count and Q from django.db.models
+            recent_reports = Token.objects.filter(
+                issued_at__date__gte=last_week
+            ).extra({
+                'date': "date(issued_at)"
+            }).values('date', 'slot__service').annotate(
+                total=Count('id'),
+                served=Count('id', filter=Q(status='completed')),
+                skipped=Count('id', filter=Q(status='skipped')),
+                cancelled=Count('id', filter=Q(status='cancelled'))
+            ).order_by('-date')[:5]
+        
+        return render(request, "core/dashboard.html", {
+            "active_tokens": active_tokens,
+            "upcoming_slots": upcoming_slots,
+            "notifications": notifications,
+            "activities": activities,
+            "today_stats": today_stats,
+            "recent_reports": recent_reports,
+        })
+        
+    except DatabaseError as e:
+        logger.error(f"Database error in dashboard: {e}")
+        # Return a simplified version or error page
+        return render(request, "core/dashboard.html", {
+            "active_tokens": [],
+            "upcoming_slots": [],
+            "notifications": [],
+            "activities": [],
+            "today_stats": {},
+            "recent_reports": [],
+            "error": "Unable to load dashboard data"
+        })
+    except Exception as e:
+        logger.error(f"Unexpected error in dashboard: {e}")
+        # Return a simplified version for any other errors
+        return render(request, "core/dashboard.html", {
+            "active_tokens": [],
+            "upcoming_slots": [],
+            "notifications": [],
+            "activities": [],
+            "today_stats": {},
+            "recent_reports": [],
+            "error": "An unexpected error occurred"
+        })
 
 # -------------------------
 # BOOKING TOKEN
@@ -244,33 +306,6 @@ def book_generic(request, service, template):
     
     return render(request, template, {"form": form, "service": service})
 
-# -------------------------
-# CANTEEN CUSTOM BOOKING FORM
-# -------------------------
-@login_required
-def book_canteen_slot(request):
-    if request.method == "POST":
-        form = CanteenTimeSlotBookingForm(request.POST)  # CHANGED THIS LINE
-        if form.is_valid():
-            booking = form.save(commit=False)
-            booking.user = request.user
-            booking.status = "confirmed"
-            booking.save()
-            
-            # Log the activity
-            ActivityLog.objects.create(
-                user=request.user,
-                action='booking_made',
-                message=f'Canteen booking for {booking.date} @ {booking.time_slot}',
-                object_type='CanteenBooking'
-            )
-            
-            messages.success(request, f"You have successfully booked the canteen slot: {booking.time_slot} on {booking.date}")
-            return redirect("dashboard")
-    else:
-        form = CanteenTimeSlotBookingForm()  # CHANGED THIS LINE
-
-    return render(request, "core/book_canteen.html", {"form": form})
 
 # -------------------------
 # USER HISTORY
@@ -363,10 +398,156 @@ def reports(request):
     canteen_count = Token.objects.filter(slot__service="canteen", issued_at__date=today).count()
     active_tokens = Token.objects.filter(status="active").count()
     
-    return render(request, "core/admin_reports.html", {
+    return render(request, "core/reports.html", {
         "total_today": total_today,
         "library_count": library_count,
         "canteen_count": canteen_count,
         "active_tokens": active_tokens,
         "today": today,
     })
+
+def staff_required(view_func):
+    """Decorator to ensure user is staff"""
+    def wrapper(request, *args, **kwargs):
+        if not request.user.is_authenticated or not request.user.is_staff:
+            from django.shortcuts import redirect
+            return redirect('login')
+        return view_func(request, *args, **kwargs)
+    return wrapper
+
+@login_required
+def reports(request):
+    """Reports page for both users and staff"""
+    if request.user.is_staff:
+        # Show admin reports with system-wide data
+        return admin_reports(request)
+    else:
+        # Show user-specific reports - redirect to my_reports
+        return my_reports(request)
+
+def admin_reports(request):
+    """Staff-only system reports"""
+    today = timezone.now().date()
+    last_30_days = today - timedelta(days=30)
+    
+    # Generate report data - manual date extraction
+    reports_data = Token.objects.filter(
+        issued_at__date__gte=last_30_days
+    ).extra({
+        'date': "date(issued_at)"
+    }).values('date', 'slot__service').annotate(
+        total=Count('id'),
+        served=Count('id', filter=Q(status='completed')),
+        skipped=Count('id', filter=Q(status='skipped')),
+        cancelled=Count('id', filter=Q(status='cancelled'))
+    ).order_by('-date', 'slot__service')
+    
+    # Debug: print the data to see what's coming through
+    print("Reports data:", list(reports_data))
+    
+    # Format data for template
+    reports = []
+    for stat in reports_data:
+        # Ensure date is properly formatted
+        date_obj = stat['date']
+        if isinstance(date_obj, str):
+            # If it's a string, convert to date object
+            from datetime import datetime
+            date_obj = datetime.strptime(date_obj, '%Y-%m-%d').date()
+        
+        reports.append({
+            'date': date_obj,
+            'queue_type': stat['slot__service'] or 'general',
+            'total': stat['total'],
+            'served': stat['served'],
+            'skipped': stat['skipped'],
+            'cancelled': stat['cancelled'],
+        })
+    
+    # Calculate totals for summary cards
+    total_tokens = sum(report['total'] for report in reports)
+    total_served = sum(report['served'] for report in reports)
+    total_skipped = sum(report['skipped'] for report in reports)
+    total_cancelled = sum(report['cancelled'] for report in reports)
+    
+    context = {
+        'reports': reports,
+        'is_staff': True,
+        'total_tokens': total_tokens,
+        'total_served': total_served,
+        'total_skipped': total_skipped,
+        'total_cancelled': total_cancelled,
+    }
+    
+    return render(request, 'core/reports.html', context)
+
+
+@login_required
+def my_reports(request):
+    """User-specific reports page"""
+    user = request.user
+    today = timezone.now().date()
+    last_30_days = today - timedelta(days=30)
+    
+    # Token statistics
+    user_tokens = Token.objects.filter(user=user)
+    recent_tokens = user_tokens.filter(issued_at__date__gte=last_30_days)
+    
+    token_stats = {
+        'total_tokens': user_tokens.count(),
+        'completed_tokens': user_tokens.filter(status='completed').count(),
+        'active_tokens': user_tokens.filter(status='active').count(),
+        'cancelled_tokens': user_tokens.filter(status='cancelled').count(),
+    }
+    
+    # Canteen statistics
+    canteen_stats = {
+        'total_bookings': CanteenBooking.objects.filter(user=user).count(),
+        'recent_bookings': CanteenBooking.objects.filter(user=user, date__gte=last_30_days).count(),
+    }
+    
+    # Service usage statistics
+    service_stats_data = recent_tokens.values('slot__service').annotate(
+        total=Count('id'),
+        completed=Count('id', filter=Q(status='completed'))
+    ).order_by('-total')
+    
+    service_stats = []
+    for stat in service_stats_data:
+        service_stats.append({
+            'service': stat['slot__service'] or 'General',
+            'total': stat['total'],
+            'completed': stat['completed'],
+        })
+    
+    # Recent tokens for activity feed
+    recent_tokens_list = recent_tokens.order_by('-issued_at')[:10]
+    
+    # Monthly breakdown
+    monthly_stats_data = user_tokens.extra({
+        'month': "strftime('%%Y-%%m', issued_at)"
+    }).values('month').annotate(
+        total=Count('id'),
+        completed=Count('id', filter=Q(status='completed')),
+        cancelled=Count('id', filter=Q(status='cancelled'))
+    ).order_by('-month')[:6]  # Last 6 months
+    
+    monthly_stats = []
+    for stat in monthly_stats_data:
+        monthly_stats.append({
+            'month': stat['month'],
+            'total': stat['total'],
+            'completed': stat['completed'],
+            'cancelled': stat['cancelled'],
+        })
+    
+    context = {
+        "is_staff": False,
+        "token_stats": token_stats,
+        "canteen_stats": canteen_stats,
+        "service_stats": service_stats,
+        "recent_tokens": recent_tokens_list,
+        "monthly_stats": monthly_stats,
+    }
+    
+    return render(request, "core/my_reports.html", context)

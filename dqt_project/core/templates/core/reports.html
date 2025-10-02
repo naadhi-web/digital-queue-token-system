@@ -1,36 +1,119 @@
 {% extends "core/base.html" %}
+{% block title %}Usage Reports - QueueToken System{% endblock %}
+
 {% block content %}
-<div class="row">
-  <div class="col-md-10 offset-md-1">
-    <div class="card p-4">
-      <h3 class="mb-3">Usage Reports</h3>
-      <table class="table table-bordered">
-        <thead>
-          <tr>
-            <th>Date</th>
-            <th>Queue Type</th>
-            <th>Total Tokens</th>
-            <th>Served</th>
-            <th>Skipped</th>
-            <th>Cancelled</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for report in reports %}
-          <tr>
-            <td>{{ report.date }}</td>
-            <td>{{ report.queue_type }}</td>
-            <td>{{ report.total }}</td>
-            <td>{{ report.served }}</td>
-            <td>{{ report.skipped }}</td>
-            <td>{{ report.cancelled }}</td>
-          </tr>
-          {% empty %}
-          <tr><td colspan="6" class="text-center">No reports yet.</td></tr>
-          {% endfor %}
-        </tbody>
-      </table>
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="mb-0 text-dark">
+                        <i class="fas fa-chart-bar"></i> 
+                        {% if is_staff %}System Usage Reports{% else %}Your Activity Reports{% endif %}
+                    </h4>
+                    {% if is_staff %}
+                    <small class="text-muted">Last 30 days system-wide analytics</small>
+                    {% endif %}
+                </div>
+                <div class="card-body">
+                    
+                    <!-- For staff users - Admin reports with system data -->
+                    {% if is_staff %}
+                    {% if reports %}
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Service</th>
+                                    <th>Total Tokens</th>
+                                    <th>Served</th>
+                                    <th>Skipped</th>
+                                    <th>Cancelled</th>
+                                    <th>Success Rate</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for report in reports %}
+                                <tr>
+                                    <td>{{ report.date|date:"M d, Y" }}</td>
+                                    <td>
+                                        <span class="badge bg-{% if report.queue_type == 'library' %}primary{% else %}success{% endif %}">
+                                            {{ report.queue_type|title }}
+                                        </span>
+                                    </td>
+                                    <td><strong>{{ report.total }}</strong></td>
+                                    <td class="text-success">{{ report.served }}</td>
+                                    <td class="text-warning">{{ report.skipped }}</td>
+                                    <td class="text-danger">{{ report.cancelled }}</td>
+                                    <td>
+                                        {% if report.total > 0 %}
+                                            {% widthratio report.served report.total 100 %}%
+                                        {% else %}
+                                            0%
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <!-- Summary Statistics -->
+                    <div class="row mt-4">
+                        <div class="col-md-3">
+                            <div class="card bg-primary text-white text-center">
+                                <div class="card-body">
+                                    <h4>{{ total_tokens }}</h4>
+                                    <small>Total Tokens</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card bg-success text-white text-center">
+                                <div class="card-body">
+                                    <h4>{{ total_served }}</h4>
+                                    <small>Served</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card bg-warning text-white text-center">
+                                <div class="card-body">
+                                    <h4>{{ total_skipped }}</h4>
+                                    <small>Skipped</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card bg-danger text-white text-center">
+                                <div class="card-body">
+                                    <h4>{{ total_cancelled }}</h4>
+                                    <small>Cancelled</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    {% else %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-chart-bar fa-4x text-muted mb-3"></i>
+                        <h4 class="text-muted">No System Data Available</h4>
+                        <p class="text-muted">System reports will appear here once tokens are booked.</p>
+                        <a href="{% url 'admin_dashboard' %}" class="btn btn-primary mt-3">
+                            <i class="fas fa-cog"></i> Go to Admin Dashboard
+                        </a>
+                    </div>
+                    {% endif %}
+
+                    <!-- For regular users - Personal activity reports -->
+                    {% else %}
+                    <!-- ... user reports code remains the same ... -->
+                    {% endif %}
+                    
+                </div>
+            </div>
+        </div>
     </div>
-  </div>
 </div>
 {% endblock %}

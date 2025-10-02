@@ -1,0 +1,305 @@
+{% extends "core/base.html" %}
+
+{% block title %}My Reports - Digital Queue Token System{% endblock %}
+
+{% block content %}
+<style>
+    .stat-card {
+        border-radius: 12px;
+        border: none;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        transition: transform 0.2s ease;
+    }
+    
+    .stat-card:hover {
+        transform: translateY(-2px);
+    }
+    
+    .stat-number {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+    
+    .service-badge {
+        background: linear-gradient(135deg, #10b981, #059669);
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-weight: 600;
+    }
+    
+    .progress-bar-custom {
+        background: linear-gradient(90deg, #10b981, #34d399);
+        border-radius: 10px;
+    }
+    
+    .card-header-custom {
+        background: linear-gradient(135deg, #10b981, #059669) !important;
+        border: none;
+        font-weight: 600;
+    }
+    
+    .list-group-item-custom {
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        margin-bottom: 0.5rem;
+        transition: all 0.2s ease;
+    }
+    
+    .list-group-item-custom:hover {
+        border-color: #10b981;
+        box-shadow: 0 2px 4px rgba(16, 185, 129, 0.1);
+    }
+</style>
+
+<div class="container mt-4">
+    <!-- Header Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card bg-light border-0">
+                <div class="card-body text-center py-4">
+                    <h1 class="card-title text-dark mb-3">
+                        <i class="fas fa-chart-bar text-success me-3"></i>My Activity Reports
+                    </h1>
+                    <p class="card-text text-muted fs-5">Comprehensive overview of your token usage and service history</p>
+                    <div class="service-badge d-inline-block mt-2">
+                        <i class="fas fa-calendar me-2"></i>Last 30 Days
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row mb-5">
+        <div class="col-md-3 mb-3">
+            <div class="card stat-card text-white" style="background: linear-gradient(135deg, #3b82f6, #1d4ed8);">
+                <div class="card-body text-center py-4">
+                    <i class="fas fa-ticket-alt fa-2x mb-3 opacity-75"></i>
+                    <h2 class="stat-number">{{ token_stats.total_tokens }}</h2>
+                    <p class="card-text mb-0">Total Tokens</p>
+                    <small class="opacity-75">All time bookings</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card stat-card text-white" style="background: linear-gradient(135deg, #10b981, #059669);">
+                <div class="card-body text-center py-4">
+                    <i class="fas fa-check-circle fa-2x mb-3 opacity-75"></i>
+                    <h2 class="stat-number">{{ token_stats.completed_tokens }}</h2>
+                    <p class="card-text mb-0">Completed</p>
+                    <small class="opacity-75">Successfully served</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card stat-card text-white" style="background: linear-gradient(135deg, #f59e0b, #d97706);">
+                <div class="card-body text-center py-4">
+                    <i class="fas fa-clock fa-2x mb-3 opacity-75"></i>
+                    <h2 class="stat-number">{{ token_stats.active_tokens }}</h2>
+                    <p class="card-text mb-0">Active</p>
+                    <small class="opacity-75">Currently waiting</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card stat-card text-white" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed);">
+                <div class="card-body text-center py-4">
+                    <i class="fas fa-utensils fa-2x mb-3 opacity-75"></i>
+                    <h2 class="stat-number">{{ canteen_stats.total_bookings }}</h2>
+                    <p class="card-text mb-0">Canteen Visits</p>
+                    <small class="opacity-75">Food court bookings</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Service Usage -->
+        <div class="col-lg-6 mb-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header card-header-custom text-white py-3">
+                    <h5 class="mb-0"><i class="fas fa-list-alt me-2"></i>Service Usage Distribution</h5>
+                </div>
+                <div class="card-body">
+                    {% if service_stats %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Service</th>
+                                    <th>Total</th>
+                                    <th>Completed</th>
+                                    <th>Success Rate</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for stat in service_stats %}
+                                <tr>
+                                    <td>
+                                        <i class="fas {% if stat.service == 'Library' %}fa-book{% else %}fa-utensils{% endif %} me-2 text-success"></i>
+                                        {{ stat.service }}
+                                    </td>
+                                    <td><strong>{{ stat.total }}</strong></td>
+                                    <td>
+                                        <span class="badge bg-success">{{ stat.completed }}</span>
+                                    </td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="progress flex-grow-1 me-2" style="height: 8px;">
+                                                <div class="progress-bar progress-bar-custom" 
+                                                     style="width: {% if stat.total > 0 %}{% widthratio stat.completed stat.total 100 %}%{% else %}0%{% endif %}">
+                                                </div>
+                                            </div>
+                                            <span class="text-nowrap">
+                                                {% if stat.total > 0 %}
+                                                    {% widthratio stat.completed stat.total 100 %}%
+                                                {% else %}
+                                                    0%
+                                                {% endif %}
+                                            </span>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-chart-pie fa-3x text-muted mb-3"></i>
+                        <p class="text-muted">No service data available yet.</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Activity -->
+        <div class="col-lg-6 mb-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header card-header-custom text-white py-3">
+                    <h5 class="mb-0"><i class="fas fa-history me-2"></i>Recent Activity</h5>
+                </div>
+                <div class="card-body">
+                    {% if recent_tokens %}
+                    <div class="list-group list-group-flush">
+                        {% for token in recent_tokens %}
+                        <div class="list-group-item list-group-item-custom px-0 border-0">
+                            <div class="d-flex w-100 justify-content-between align-items-start">
+                                <div class="flex-grow-1">
+                                    <div class="d-flex align-items-center mb-2">
+                                        <h6 class="mb-0 me-3">Token #{{ token.number }}</h6>
+                                        <span class="badge 
+                                            {% if token.status == 'completed' %}bg-success
+                                            {% elif token.status == 'active' %}bg-warning
+                                            {% elif token.status == 'cancelled' %}bg-danger
+                                            {% else %}bg-secondary{% endif %}">
+                                            {{ token.status|title }}
+                                        </span>
+                                    </div>
+                                    <p class="mb-1 text-muted">
+                                        <i class="fas {% if token.service == 'Library' %}fa-book{% else %}fa-utensils{% endif %} me-1"></i>
+                                        {{ token.service }}
+                                    </p>
+                                    <small class="text-muted">
+                                        <i class="fas fa-clock me-1"></i>
+                                        {{ token.issued_at|date:"M d, Y H:i" }}
+                                    </small>
+                                </div>
+                                <i class="fas fa-chevron-right text-muted mt-2"></i>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-ticket-alt fa-3x text-muted mb-3"></i>
+                        <p class="text-muted">No recent token activity.</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Monthly Breakdown -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header card-header-custom text-white py-3">
+                    <h5 class="mb-0"><i class="fas fa-calendar-alt me-2"></i>Monthly Performance</h5>
+                </div>
+                <div class="card-body">
+                    {% if monthly_stats %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Month</th>
+                                    <th>Total Tokens</th>
+                                    <th>Completed</th>
+                                    <th>Cancelled</th>
+                                    <th>Success Rate</th>
+                                    <th>Efficiency</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for stat in monthly_stats %}
+                                <tr>
+                                    <td>
+                                        <strong>{{ stat.month }}</strong>
+                                    </td>
+                                    <td>{{ stat.total }}</td>
+                                    <td>
+                                        <span class="badge bg-success">{{ stat.completed }}</span>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-danger">{{ stat.cancelled }}</span>
+                                    </td>
+                                    <td>
+                                        {% if stat.total > 0 %}
+                                            {% widthratio stat.completed stat.total 100 %}%
+                                        {% else %}
+                                            0%
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <div class="progress" style="height: 6px; width: 80px;">
+                                            <div class="progress-bar progress-bar-custom" 
+                                                 style="width: {% if stat.total > 0 %}{% widthratio stat.completed stat.total 100 %}%{% else %}0%{% endif %}">
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-chart-line fa-3x text-muted mb-3"></i>
+                        <p class="text-muted">No monthly performance data available.</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="row mt-5">
+        <div class="col-12 text-center">
+            <div class="d-grid gap-2 d-md-flex justify-content-center">
+                <a href="{% url 'dashboard' %}" class="btn btn-primary btn-lg px-4">
+                    <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+                </a>
+                <a href="{% url 'my_history' %}" class="btn btn-outline-success btn-lg px-4">
+                    <i class="fas fa-history me-2"></i>View Full History
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

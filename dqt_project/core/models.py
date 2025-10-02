@@ -27,7 +27,7 @@ class Slot(models.Model):
 
     def __str__(self):
         return self.name
-
+    
 class Token(models.Model):
     STATUS_CHOICES = [
         ("active", "Active"),

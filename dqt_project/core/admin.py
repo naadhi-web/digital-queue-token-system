@@ -1,5 +1,9 @@
 from django.contrib import admin
 from .models import QueueSlot, Token, VisitHistory, CanteenBooking, ActivityLog, Notification
+from django.urls import path
+from django.shortcuts import render
+from django.db.models import Count, Avg
+import datetime
 
 # Customize Admin Headers
 admin.site.site_header = "Digital Queue Token System Admin"
@@ -16,6 +20,32 @@ class TokenAdmin(admin.ModelAdmin):
     def slot_service(self, obj):
         return obj.slot.service if obj.slot else '-'
     slot_service.short_description = 'Slot Service'
+
+class ReportsAdmin(admin.ModelAdmin):
+    
+    def get_urls(self):
+        urls = super().get_urls()
+        custom_urls = [
+            path('reports/', self.admin_site.admin_view(self.reports_view), name='core_reports'),
+        ]
+        return custom_urls + urls
+
+    def reports_view(self, request):
+        # Generate report data
+        today = datetime.date.today()
+        
+        # Example report data
+        total_tokens = Token.objects.count()
+        today_tokens = Token.objects.filter(issued_at__date=today).count()
+        completed_visits = VisitHistory.objects.filter(outcome='completed').count()
+        
+        context = {
+            'total_tokens': total_tokens,
+            'today_tokens': today_tokens,
+            'completed_visits': completed_visits,
+            'title': 'System Reports'
+        }
+        return render(request, 'admin/core/reports.html', context)
 
 @admin.register(QueueSlot)
 class QueueSlotAdmin(admin.ModelAdmin):
