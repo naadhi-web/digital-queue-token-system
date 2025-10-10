@@ -1,42 +1,217 @@
 {% extends "core/base.html" %}
 
 {% block content %}
-<div class="d-flex justify-content-center align-items-center" style="min-height: 80vh;">
-  <div class="card shadow-lg p-4" style="max-width: 500px; width: 100%; border-radius: 15px;">
-    <h3 class="text-center mb-4 fw-bold text-success">📚 Book a Library Slot</h3>
-
+<div class="container mt-4">
+    <!-- Messages -->
     {% if messages %}
-      {% for message in messages %}
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-          {{ message }}
-          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        <div class="mb-4">
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
         </div>
-      {% endfor %}
     {% endif %}
 
-    <form method="post" novalidate>
-      {% csrf_token %}
+    <!-- Booking Card -->
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header text-center" style="background: linear-gradient(135deg, #28a745, #20c997); color: white; border-radius: 10px 10px 0 0 !important;">
+                    <h3 class="mb-0">📚 Book Library Token</h3>
+                    <p class="mb-0">Select an available time slot for library service</p>
+                </div>
+                <div class="card-body">
+                    <!-- Form Method 1: Traditional Form -->
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        {% if form.slot.field.queryset.exists %}
+                            <div class="mb-4">
+                                <h5 class="mb-3 text-success">Available Time Slots</h5>
+                                <div class="row">
+                                    {% for slot in form.slot.field.queryset %}
+                                        <div class="col-md-6 mb-3">
+                                            <div class="card slot-card" onclick="selectSlot({{ slot.id }})" id="slot-{{ slot.id }}" style="transition: transform 0.2s; cursor: pointer; border: 1px solid #e9ecef;">
+                                                <div class="card-body">
+                                                    <h6 class="card-title text-success">
+                                                        <i class="fas fa-book"></i> {{ slot.get_service_display }}
+                                                    </h6>
+                                                    <p class="card-text mb-1">
+                                                        <strong>📅 Date:</strong> {{ slot.date }}<br>
+                                                        <strong>⏰ Time:</strong> {{ slot.start_time|time:"H:i" }} - {{ slot.end_time|time:"H:i" }}
+                                                    </p>
+                                                    <small class="text-muted">
+                                                        <strong>Capacity:</strong> 
+                                                        <span class="{% if slot.token_set.count >= slot.max_tokens %}text-danger{% elif slot.token_set.count >= slot.max_tokens|add:'-2' %}text-warning{% else %}text-success{% endif %}">
+                                                            {{ slot.token_set.count }}/{{ slot.max_tokens }}
+                                                        </span>
+                                                    </small>
+                                                    <input type="radio" name="slot" value="{{ slot.id }}" 
+                                                           id="slot-radio-{{ slot.id }}" style="display: none;" required>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
 
-      <div class="mb-3">
-        {{ form.slot.label_tag }}
-        {{ form.slot }}
-        {% if form.slot.errors %}
-          <div class="text-danger small">{{ form.slot.errors }}</div>
-        {% endif %}
-      </div>
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-primary btn-lg" style="background: linear-gradient(135deg, #28a745, #20c997); border: none;">
+                                    <i class="fas fa-ticket-alt"></i> Book Library Token
+                                </button>
+                            </div>
+                        {% else %}
+                            <div class="text-center py-4">
+                                <div class="alert alert-warning">
+                                    <h5>⏳ No Available Slots</h5>
+                                    <p class="mb-0">There are no available library slots at the moment.</p>
+                                    <p>Please check back later or contact administration.</p>
+                                </div>
+                                <a href="{% url 'dashboard' %}" class="btn btn-secondary">Back to Dashboard</a>
+                            </div>
+                        {% endif %}
+                    </form>
 
-      <div class="mb-3">
-        {{ form.date.label_tag }}
-        {{ form.date }}
-        {% if form.date.errors %}
-          <div class="text-danger small">{{ form.date.errors }}</div>
-        {% endif %}
-      </div>
+                    <!-- Alternative: Direct Slot Selection Method -->
+                    {% if form.slot.field.queryset.exists %}
+                        <hr class="my-4">
+                        <h6 class="text-center text-success">Or book directly by clicking on a slot card</h6>
+                        
+                        {% for slot in form.slot.field.queryset %}
+                            <form method="post" class="d-inline">
+                                {% csrf_token %}
+                                <input type="hidden" name="slot" value="{{ slot.id }}">
+                                <div class="card slot-card mb-2" onclick="this.closest('form').submit()" style="transition: transform 0.2s; cursor: pointer; border: 1px solid #e9ecef;">
+                                    <div class="card-body py-3">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <h6 class="mb-1 text-success">
+                                                    <i class="fas fa-clock"></i> {{ slot.date }} | {{ slot.start_time|time:"H:i" }} - {{ slot.end_time|time:"H:i" }}
+                                                </h6>
+                                                <small class="text-muted">
+                                                    {{ slot.get_service_display }} • 
+                                                    <strong>Capacity:</strong> 
+                                                    <span class="{% if slot.token_set.count >= slot.max_tokens %}text-danger{% elif slot.token_set.count >= slot.max_tokens|add:'-2' %}text-warning{% else %}text-success{% endif %}">
+                                                        {{ slot.token_set.count }}/{{ slot.max_tokens }}
+                                                    </span>
+                                                </small>
+                                            </div>
+                                            <button type="submit" class="btn btn-primary btn-sm" style="background: linear-gradient(135deg, #28a745, #20c997); border: none;">
+                                                <i class="fas fa-check"></i> Book This Slot
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+                <div class="card-footer text-muted text-center" style="background-color: #f8fff9; border-top: 1px solid #e9ecef;">
+                    <small>
+                        <i class="fas fa-info-circle text-success"></i>
+                        You can only have one active library token at a time.<br>
+                        Cancellations can be made from your dashboard.
+                    </small>
+                </div>
+            </div>
 
-      <button type="submit" class="btn btn-success w-100">
-        <i class="bi bi-bookmark-check-fill"></i> Book Slot
-      </button>
-    </form>
-  </div>
-</div>
+           
+
+<!-- Font Awesome for Icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+<style>
+    .slot-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 12px rgba(40, 167, 69, 0.15);
+    }
+    .slot-selected {
+        border: 2px solid #28a745 !important;
+        background-color: #f8fff9;
+    }
+    .btn-outline-primary:hover {
+        background-color: #28a745;
+        border-color: #28a745;
+        color: white;
+    }
+    .btn-outline-info:hover {
+        background-color: #20c997;
+        border-color: #20c997;
+        color: white;
+    }
+    
+    /* Custom navbar styling */
+    .navbar-custom {
+        background: linear-gradient(135deg, #2e7d32, #388e3c) !important;
+    }
+    .navbar-custom .navbar-nav .nav-link {
+        color: white !important;
+    }
+    .navbar-custom .navbar-nav .nav-link:hover {
+        color: #e8f5e8 !important;
+    }
+</style>
+
+<script>
+    // Slot selection functionality
+    function selectSlot(slotId) {
+        // Remove selection from all slots
+        document.querySelectorAll('.slot-card').forEach(card => {
+            card.classList.remove('slot-selected');
+            card.style.backgroundColor = '';
+        });
+        
+        // Add selection to clicked slot
+        const selectedCard = document.getElementById('slot-' + slotId);
+        selectedCard.classList.add('slot-selected');
+        selectedCard.style.backgroundColor = '#f8fff9';
+        
+        // Check the radio button
+        const radio = document.getElementById('slot-radio-' + slotId);
+        if (radio) {
+            radio.checked = true;
+        }
+    }
+
+    // Auto-select if there's only one slot
+    document.addEventListener('DOMContentLoaded', function() {
+        const slots = document.querySelectorAll('.slot-card');
+        if (slots.length === 1) {
+            const slotId = slots[0].id.split('-')[1];
+            selectSlot(slotId);
+        }
+    });
+
+    // Form submission handling
+    const mainForm = document.querySelector('form');
+    if (mainForm) {
+        mainForm.addEventListener('submit', function(e) {
+            const selectedSlot = document.querySelector('input[name="slot"]:checked');
+            if (!selectedSlot) {
+                e.preventDefault();
+                alert('Please select a time slot before booking.');
+                return false;
+            }
+        });
+    }
+
+    // Add capacity-based color coding
+    document.addEventListener('DOMContentLoaded', function() {
+        document.querySelectorAll('.slot-card').forEach(card => {
+            const capacityText = card.querySelector('span');
+            if (capacityText) {
+                const [current, max] = capacityText.textContent.split('/').map(Number);
+                if (current >= max) {
+                    card.style.borderLeft = '4px solid #dc3545';
+                } else if (current >= max - 2) {
+                    card.style.borderLeft = '4px solid #ffc107';
+                } else {
+                    card.style.borderLeft = '4px solid #28a745';
+                }
+            }
+        });
+    });
+</script>
 {% endblock %}

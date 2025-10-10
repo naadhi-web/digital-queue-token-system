@@ -333,15 +333,84 @@ def my_history(request):
 def is_admin(user):
     return user.is_staff
 
-@user_passes_test(is_admin)
+@login_required
 def admin_dashboard(request):
-    active_tokens = Token.objects.filter(status="active").order_by("issued_at")
-    today_bookings = CanteenBooking.objects.filter(date=timezone.now().date())
+    """Admin dashboard with real-time statistics"""
+    if not request.user.is_staff:
+        return redirect('dashboard')
     
-    return render(request, "core/admin_dashboard.html", {
-        "active_tokens": active_tokens,
-        "today_bookings": today_bookings,
-    })
+    today = timezone.now().date()
+    print(f"🔍 DEBUG: Today's date is {today}")
+    
+    # Check ALL tokens first
+    all_tokens = Token.objects.all()
+    print(f"🔍 DEBUG: Total tokens in database: {all_tokens.count()}")
+    
+    # Check token dates and statuses
+    for token in all_tokens[:5]:  # First 5 tokens
+        print(f"🔍 DEBUG: Token #{token.id} - Date: {token.issued_at.date() if token.issued_at else 'No date'} - Status: {token.status}")
+    
+    # Today's statistics - try different date filters
+    today_tokens = Token.objects.filter(issued_at__date=today)
+    print(f"🔍 DEBUG: Today tokens (date filter): {today_tokens.count()}")
+    
+    # Alternative date filter
+    today_tokens_alt = Token.objects.filter(
+        issued_at__year=today.year,
+        issued_at__month=today.month, 
+        issued_at__day=today.day
+    )
+    print(f"🔍 DEBUG: Today tokens (alternative filter): {today_tokens_alt.count()}")
+    
+    # Use the alternative filter if it works better
+    today_tokens = today_tokens_alt
+    
+    total_tokens_today = today_tokens.count()
+    served_today = today_tokens.filter(status='completed').count()
+    
+    print(f"🔍 DEBUG: Total tokens today: {total_tokens_today}")
+    print(f"🔍 DEBUG: Served today: {served_today}")
+    
+    # Service-wise breakdown for today
+    library_today = today_tokens.filter(slot__service='library').count()
+    canteen_today = today_tokens.filter(slot__service='canteen').count()
+    
+    print(f"🔍 DEBUG: Library today: {library_today}")
+    print(f"🔍 DEBUG: Canteen today: {canteen_today}")
+    
+    # Check all statuses
+    all_pending = Token.objects.filter(status='pending')
+    all_active = Token.objects.filter(status='active')
+    all_completed = Token.objects.filter(status='completed')
+    
+    print(f"🔍 DEBUG: All pending tokens: {all_pending.count()}")
+    print(f"🔍 DEBUG: All active tokens: {all_active.count()}")
+    print(f"🔍 DEBUG: All completed tokens: {all_completed.count()}")
+    
+    # Pending tokens (all time for now)
+    pending_tokens = all_pending
+    active_tokens = all_active
+    
+    print(f"🔍 DEBUG: Pending tokens: {pending_tokens.count()}")
+    print(f"🔍 DEBUG: Active tokens: {active_tokens.count()}")
+    
+    # ALL active tokens for the comprehensive table (including pending and active)
+    all_active_tokens = Token.objects.filter(status__in=['pending', 'active']).order_by('issued_at')
+    print(f"🔍 DEBUG: All active tokens for table: {all_active_tokens.count()}")
+    
+    context = {
+        'total_tokens_today': total_tokens_today,
+        'served_today': served_today,
+        'library_today': library_today,
+        'canteen_today': canteen_today,
+        'pending_tokens': pending_tokens,
+        'active_tokens': active_tokens,
+        'all_active_tokens': all_active_tokens,  # This is for the table
+        'today': today,
+    }
+    
+    return render(request, 'core/admin_dashboard.html', context)
+
 
 @user_passes_test(is_admin)
 def complete_token(request, token_id):

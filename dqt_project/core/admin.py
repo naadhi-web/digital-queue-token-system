@@ -1,3 +1,4 @@
+
 from django.contrib import admin
 from .models import QueueSlot, Token, VisitHistory, CanteenBooking, ActivityLog, Notification
 from django.urls import path
