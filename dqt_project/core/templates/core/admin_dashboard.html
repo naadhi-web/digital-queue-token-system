@@ -1,3 +1,4 @@
+
 {% extends "core/base.html" %}
 {% block title %}Admin Panel - QueueToken System{% endblock %}
 
@@ -17,194 +18,139 @@
             </div>
         </div>
     </div>
-
-    <!-- Statistics Cards -->
-    <div class="row mb-4">
-        <div class="col-md-3 mb-3">
-            <div class="card text-white bg-primary">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between">
-                        <div>
-                            <h4>{{ total_tokens_today }}</h4>
-                            <p>Total Tokens Today</p>
-                        </div>
-                        <i class="fas fa-ticket-alt fa-2x opacity-50"></i>
+<!-- Statistics Cards -->
+<div class="row mb-4">
+    <div class="col-md-3 mb-3">
+        <div class="card text-white bg-primary">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4>{{ total_tokens_today }}</h4>
+                        <p>Total Tokens Today</p>
                     </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3 mb-3">
-            <div class="card text-white bg-success">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between">
-                        <div>
-                            <h4>{{ served_today }}</h4>
-                            <p>Served Today</p>
-                        </div>
-                        <i class="fas fa-check-circle fa-2x opacity-50"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3 mb-3">
-            <div class="card text-white bg-warning">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between">
-                        <div>
-                            <h4>{{ pending_tokens.count }}</h4>
-                            <p>Pending Tokens</p>
-                        </div>
-                        <i class="fas fa-clock fa-2x opacity-50"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3 mb-3">
-            <div class="card text-white bg-info">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between">
-                        <div>
-                            <h4>{{ active_tokens.count }}</h4>
-                            <p>Active Now</p>
-                        </div>
-                        <i class="fas fa-play-circle fa-2x opacity-50"></i>
-                    </div>
+                    <i class="fas fa-ticket-alt fa-2x opacity-50"></i>
                 </div>
             </div>
         </div>
     </div>
-
-    <!-- Active Tokens Table -->
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-header bg-success text-white">
-                    <h5 class="mb-0">
-                        <i class="fas fa-list"></i> Active Tokens
-                    </h5>
-                </div>
-                <div class="card-body">
-                    {% if all_active_tokens %}
-                    <div class="table-responsive">
-                        <table class="table table-hover">
-                            <thead>
-                                <tr>
-                                    <th>Token No</th>
-                                    <th>User</th>
-                                    <th>Service</th>
-                                    <th>Status</th>
-                                    <th>Issued At</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for token in all_active_tokens %}
-                                <tr>
-                                    <td><strong>#{{ token.number }}</strong></td>
-                                    <td>{{ token.user.username }}</td>
-                                    <td>
-                                        <span class="badge bg-{% if token.slot.service == 'library' %}info{% else %}success{% endif %}">
-                                            {{ token.slot.get_service_display }}
-                                        </span>
-                                    </td>
-                                    <td>
-                                        <span class="badge 
-                                            {% if token.status == 'pending' %}bg-warning
-                                            {% elif token.status == 'active' %}bg-primary
-                                            {% elif token.status == 'completed' %}bg-success
-                                            {% elif token.status == 'skipped' %}bg-danger
-                                            {% elif token.status == 'cancelled' %}bg-secondary
-                                            {% else %}bg-dark{% endif %}">
-                                            {{ token.status|title }}
-                                        </span>
-                                    </td>
-                                    <td>{{ token.issued_at|time }}</td>
-                                    <td>
-                                        <div class="btn-group btn-group-sm">
-                                            {% if token.status != 'completed' %}
-                                            <a href="{% url 'complete_token' token.id %}" class="btn btn-success">
-                                                <i class="fas fa-check"></i> Mark Served
-                                            </a>
-                                            <a href="{% url 'skip_token' token.id %}" class="btn btn-danger">
-                                                <i class="fas fa-forward"></i> Skip
-                                            </a>
-                                            {% else %}
-                                            <span class="text-muted">Completed</span>
-                                            {% endif %}
-                                        </div>
-                                    </td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
+    <div class="col-md-3 mb-3">
+        <div class="card text-white bg-success">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4>{{ served_today }}</h4>
+                        <p>Served Today</p>
                     </div>
-                    {% else %}
-                    <div class="text-center py-4">
-                        <i class="fas fa-check-circle fa-3x text-muted mb-3"></i>
-                        <h5 class="text-muted">No Active Tokens</h5>
-                        <p class="text-muted">All tokens have been processed</p>
-                    </div>
-                    {% endif %}
+                    <i class="fas fa-check-circle fa-2x opacity-50"></i>
                 </div>
             </div>
         </div>
     </div>
-
-    <div class="row">
-        <!-- Manage Queue Section -->
-        <div class="col-lg-6 mb-4">
-            <div class="card">
-                <div class="card-header bg-primary text-white">
-                    <h5 class="mb-0">
-                        <i class="fas fa-tasks"></i> Manage Queue - Pending Tokens
-                    </h5>
-                </div>
-                <div class="card-body">
-                    {% if pending_tokens %}
-                    <div class="list-group">
-                        {% for token in pending_tokens %}
-                        <div class="list-group-item d-flex justify-content-between align-items-center">
-                            <div>
-                                <strong>#{{ token.number }}</strong>
-                                <span class="badge bg-{% if token.slot.service == 'library' %}info{% else %}success{% endif %} ms-2">
-                                    {{ token.slot.get_service_display }}
-                                </span>
-                                <br>
-                                <small class="text-muted">User: {{ token.user.username }} | {{ token.issued_at|time }}</small>
-                            </div>
-                            <div class="btn-group">
-                                <a href="{% url 'complete_token' token.id %}" class="btn btn-success btn-sm">
-                                    <i class="fas fa-check"></i> Mark Served
-                                </a>
-                                <a href="{% url 'skip_token' token.id %}" class="btn btn-warning btn-sm">
-                                    <i class="fas fa-forward"></i> Skip
-                                </a>
-                            </div>
-                        </div>
-                        {% endfor %}
+    <div class="col-md-3 mb-3">
+        <div class="card text-white bg-warning">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4>{{ active_tokens.count }}</h4>
+                        <p>Active Now</p>
                     </div>
-                    {% else %}
-                    <div class="text-center py-4">
-                        <i class="fas fa-check-circle fa-3x text-muted mb-3"></i>
-                        <h5 class="text-muted">No pending tokens</h5>
-                        <p class="text-muted">All tokens have been processed</p>
-                    </div>
-                    {% endif %}
+                    <i class="fas fa-play-circle fa-2x opacity-50"></i>
                 </div>
             </div>
         </div>
+    </div>
+   
+</div>
 
-        <!-- Reports Section -->
-        <div class="col-lg-6 mb-4">
-            <div class="card">
-                <div class="card-header bg-success text-white">
-                    <h5 class="mb-0">
-                        <i class="fas fa-chart-bar"></i> Today's Reports
-                    </h5>
+<!-- Active Tokens Table -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-list"></i> Active Tokens
+                </h5>
+            </div>
+            <div class="card-body">
+                {% if all_active_tokens %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Token No</th>
+                                <th>User</th>
+                                <th>Service</th>
+                                <th>Status</th>
+                                <th>Issued At</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for token in all_active_tokens %}
+                            <tr>
+                                <td><strong>#{{ token.number }}</strong></td>
+                                <td>{{ token.user.username }}</td>
+                                <td>
+                                    <span class="badge bg-{% if token.slot.service == 'library' %}info{% else %}success{% endif %}">
+                                        {{ token.slot.get_service_display }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="badge 
+                                        {% if token.status == 'pending' %}bg-warning
+                                        {% elif token.status == 'active' %}bg-primary
+                                        {% elif token.status == 'completed' %}bg-success
+                                        {% elif token.status == 'skipped' %}bg-danger
+                                        {% elif token.status == 'cancelled' %}bg-secondary
+                                        {% else %}bg-dark{% endif %}">
+                                        {{ token.status|title }}
+                                    </span>
+                                </td>
+                                <td>{{ token.issued_at|time }}</td>
+                                <td>
+                                    <div class="btn-group btn-group-sm">
+                                        {% if token.status != 'completed' %}
+                                        <a href="{% url 'complete_token' token.id %}" class="btn btn-success">
+                                            <i class="fas fa-check"></i> Mark Served
+                                        </a>
+                                        <a href="{% url 'skip_token' token.id %}" class="btn btn-danger">
+                                            <i class="fas fa-forward"></i> Skip
+                                        </a>
+                                        {% else %}
+                                        <span class="text-muted">Completed</span>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
                 </div>
-                <div class="card-body">
+                {% else %}
+                <div class="text-center py-4">
+                    <i class="fas fa-check-circle fa-3x text-muted mb-3"></i>
+                    <h5 class="text-muted">No Active Tokens</h5>
+                    <p class="text-muted">All tokens have been processed</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Reports Section -->
+    <div class="col-lg-8 mx-auto mb-4">
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-chart-bar"></i> Today's Reports & Analytics
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
                     <!-- Total Tokens Served Today -->
-                    <div class="mb-4">
+                    <div class="col-md-6 mb-4">
                         <h6>Total Tokens Served Today</h6>
                         <div class="progress" style="height: 25px;">
                             <div class="progress-bar bg-success" 
@@ -223,8 +169,8 @@
                     </div>
 
                     <!-- Library vs Canteen -->
-                    <div class="mb-4">
-                        <h6>Library vs Canteen Distribution</h6>
+                    <div class="col-md-6 mb-4">
+                        <h6>Service Distribution</h6>
                         <div class="row">
                             <div class="col-6">
                                 <div class="card bg-info text-white text-center">
@@ -244,12 +190,40 @@
                             </div>
                         </div>
                     </div>
+                </div>
 
-                    <!-- Quick Actions -->
-                    <div class="mt-4">
+                <!-- Current Queue Status -->
+                <div class="row mt-4">
+                    <div class="col-12">
+                        <h6>Current Queue Status</h6>
+                        <div class="row text-center">
+                            <div class="col-md-4 mb-3">
+                                <div class="card bg-primary text-white">
+                                    <div class="card-body py-3">
+                                        <h3>{{ active_tokens.count }}</h3>
+                                        <small>Currently Active</small>
+                                    </div>
+                                </div>
+                            </div>
+                           
+                            <div class="col-md-4 mb-3">
+                                <div class="card bg-success text-white">
+                                    <div class="card-body py-3">
+                                        <h3>{{ served_today }}</h3>
+                                        <small>Served Today</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="row mt-4">
+                    <div class="col-12">
                         <h6>Quick Actions</h6>
-                        <div class="d-grid gap-2">
-                            <a href="{% url 'reports' %}" class="btn btn-outline-primary">
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-center">
+                            <a href="{% url 'reports' %}" class="btn btn-outline-primary me-md-2">
                                 <i class="fas fa-chart-line"></i> View Detailed Reports
                             </a>
                             <a href="/admin/" class="btn btn-outline-success">
